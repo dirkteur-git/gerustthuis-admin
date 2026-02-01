@@ -273,6 +273,7 @@ function getStatusClass(status) {
           class="ticket-card"
           :class="ticket.status"
         >
+          <span class="ticket-number">{{ ticket.ticketNumber }}</span>
           <span class="ticket-priority" :class="ticket.priority">{{ ticket.priority }}</span>
           <span class="ticket-title">{{ ticket.title }}</span>
           <span class="ticket-status">{{ ticket.status }}</span>
@@ -825,6 +826,13 @@ section {
   padding: 0.75rem;
   background: rgba(0, 0, 0, 0.02);
   border-radius: 6px;
+}
+
+.ticket-number {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary);
 }
 
 .ticket-priority {

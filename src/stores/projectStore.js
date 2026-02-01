@@ -19,6 +19,41 @@ function loadData() {
 // Create reactive store
 export const store = reactive(loadData())
 
+// Migrate existing tickets without ticketNumber
+function migrateTickets() {
+  let needsMigration = false
+  store.tickets.forEach(ticket => {
+    if (!ticket.ticketNumber) {
+      ticket.ticketNumber = `GT-${String(store.nextTicketNumber || 1).padStart(3, '0')}`
+      store.nextTicketNumber = (store.nextTicketNumber || 1) + 1
+      needsMigration = true
+    }
+    // Migrate deadline to plannedWeek if exists
+    if (ticket.deadline && !ticket.plannedWeek) {
+      // Convert date to week number
+      const date = new Date(ticket.deadline)
+      const startOfYear = new Date(date.getFullYear(), 0, 1)
+      const weekNum = Math.ceil(((date - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7)
+      ticket.plannedWeek = weekNum
+      delete ticket.deadline
+      needsMigration = true
+    }
+    // Initialize dependencies arrays if not present
+    if (!ticket.dependsOn) {
+      ticket.dependsOn = []
+      needsMigration = true
+    }
+    if (!ticket.blockedBy) {
+      ticket.blockedBy = []
+      needsMigration = true
+    }
+  })
+  if (needsMigration) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
+  }
+}
+migrateTickets()
+
 // Auto-save to localStorage
 watch(
   () => store,
@@ -41,20 +76,96 @@ export function getTicketsByStatus(status) {
   return store.tickets.filter(t => t.status === status)
 }
 
+export function getNextTicketNumber() {
+  const num = store.nextTicketNumber || 1
+  return `GT-${String(num).padStart(3, '0')}`
+}
+
 export function addTicket(ticket) {
+  const ticketNumber = getNextTicketNumber()
   const newTicket = {
     id: Date.now(),
+    ticketNumber,
     title: ticket.title || '',
     description: ticket.description || '',
     phaseId: ticket.phaseId,
     status: ticket.status || 'todo',
     priority: ticket.priority || 'should',
     estimatedHours: ticket.estimatedHours || null,
-    deadline: ticket.deadline || null,
+    plannedWeek: ticket.plannedWeek || null,
+    dependsOn: ticket.dependsOn || [], // tickets that must be done before this one
+    blockedBy: ticket.blockedBy || [], // tickets that are waiting for this one
     createdAt: new Date().toISOString()
   }
   store.tickets.push(newTicket)
+  store.nextTicketNumber = (store.nextTicketNumber || 1) + 1
   return newTicket
+}
+
+export function getTicketById(id) {
+  return store.tickets.find(t => t.id === id)
+}
+
+export function getTicketByNumber(ticketNumber) {
+  return store.tickets.find(t => t.ticketNumber === ticketNumber)
+}
+
+export function addDependency(ticketId, dependsOnId) {
+  const ticket = store.tickets.find(t => t.id === ticketId)
+  const dependsOnTicket = store.tickets.find(t => t.id === dependsOnId)
+  if (ticket && dependsOnTicket) {
+    if (!ticket.dependsOn) ticket.dependsOn = []
+    if (!dependsOnTicket.blockedBy) dependsOnTicket.blockedBy = []
+
+    if (!ticket.dependsOn.includes(dependsOnId)) {
+      ticket.dependsOn.push(dependsOnId)
+    }
+    if (!dependsOnTicket.blockedBy.includes(ticketId)) {
+      dependsOnTicket.blockedBy.push(ticketId)
+    }
+  }
+}
+
+export function removeDependency(ticketId, dependsOnId) {
+  const ticket = store.tickets.find(t => t.id === ticketId)
+  const dependsOnTicket = store.tickets.find(t => t.id === dependsOnId)
+  if (ticket && ticket.dependsOn) {
+    ticket.dependsOn = ticket.dependsOn.filter(id => id !== dependsOnId)
+  }
+  if (dependsOnTicket && dependsOnTicket.blockedBy) {
+    dependsOnTicket.blockedBy = dependsOnTicket.blockedBy.filter(id => id !== ticketId)
+  }
+}
+
+export function getTicketChain(ticketId, visited = new Set()) {
+  if (visited.has(ticketId)) return []
+  visited.add(ticketId)
+
+  const ticket = store.tickets.find(t => t.id === ticketId)
+  if (!ticket) return []
+
+  const chain = [ticket]
+
+  // Get all tickets this depends on (predecessors)
+  if (ticket.dependsOn) {
+    ticket.dependsOn.forEach(depId => {
+      chain.unshift(...getTicketChain(depId, visited))
+    })
+  }
+
+  return chain
+}
+
+export function getBlockedTickets(ticketId) {
+  const ticket = store.tickets.find(t => t.id === ticketId)
+  if (!ticket || !ticket.blockedBy) return []
+  return ticket.blockedBy.map(id => store.tickets.find(t => t.id === id)).filter(Boolean)
+}
+
+export function getDependencyTickets(ticketId) {
+  const ticket = store.tickets.find(t => t.id === ticketId)
+  if (!ticket || !ticket.dependsOn) return []
+  return ticket.dependsOn.map(id => store.tickets.find(t => t.id === id)).filter(Boolean)
 }
 
 export function updateTicket(id, updates) {

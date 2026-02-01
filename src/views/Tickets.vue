@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { store, addTicket, updateTicket, deleteTicket } from '../stores/projectStore.js'
+import { store, addTicket, updateTicket, deleteTicket, addDependency, removeDependency, getTicketById } from '../stores/projectStore.js'
 
 const route = useRoute()
 
@@ -30,8 +30,53 @@ const newTicket = ref({
   phaseId: 0,
   priority: 'should',
   estimatedHours: null,
-  deadline: ''
+  plannedWeek: null
 })
+
+// Get current week number
+function getCurrentWeek() {
+  const now = new Date()
+  const startOfYear = new Date(now.getFullYear(), 0, 1)
+  return Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7)
+}
+
+// Generate week options (current week + 26 weeks ahead)
+const weekOptions = computed(() => {
+  const current = getCurrentWeek()
+  const options = []
+  for (let i = 0; i < 26; i++) {
+    const week = current + i
+    options.push({ value: week, label: `Week ${week}` })
+  }
+  return options
+})
+
+// Get available tickets for dependency selection (excluding self)
+function getAvailableTicketsForDependency(excludeId) {
+  return store.tickets.filter(t => t.id !== excludeId)
+}
+
+// Add dependency to editing ticket
+function addTicketDependency(dependsOnId) {
+  if (!editingTicket.value.dependsOn) {
+    editingTicket.value.dependsOn = []
+  }
+  if (!editingTicket.value.dependsOn.includes(dependsOnId)) {
+    editingTicket.value.dependsOn.push(dependsOnId)
+  }
+}
+
+// Remove dependency from editing ticket
+function removeTicketDependency(dependsOnId) {
+  if (editingTicket.value.dependsOn) {
+    editingTicket.value.dependsOn = editingTicket.value.dependsOn.filter(id => id !== dependsOnId)
+  }
+}
+
+// Get ticket info by id
+function getTicketInfo(ticketId) {
+  return getTicketById(ticketId)
+}
 
 // Drag and drop
 const draggedTicket = ref(null)
@@ -61,7 +106,7 @@ function openAddModal() {
     phaseId: filterPhase.value !== 'all' ? filterPhase.value : 0,
     priority: 'should',
     estimatedHours: null,
-    deadline: ''
+    plannedWeek: null
   }
   showAddModal.value = true
 }
@@ -155,14 +200,21 @@ function getPhaseName(phaseId) {
             @click="openEditModal(ticket)"
           >
             <div class="ticket-header">
+              <span class="ticket-number">{{ ticket.ticketNumber }}</span>
               <span class="priority-badge" :class="ticket.priority">{{ ticket.priority }}</span>
               <span class="phase-tag">{{ ticket.phaseId }}</span>
             </div>
             <h4>{{ ticket.title }}</h4>
             <p v-if="ticket.description">{{ ticket.description }}</p>
-            <div v-if="ticket.estimatedHours || ticket.deadline" class="ticket-meta">
+            <div class="ticket-meta">
               <span v-if="ticket.estimatedHours">{{ ticket.estimatedHours }}u</span>
-              <span v-if="ticket.deadline">{{ ticket.deadline }}</span>
+              <span v-if="ticket.plannedWeek" class="week-badge">W{{ ticket.plannedWeek }}</span>
+              <span v-if="ticket.dependsOn && ticket.dependsOn.length" class="dep-badge" title="Heeft dependencies">
+                ← {{ ticket.dependsOn.length }}
+              </span>
+              <span v-if="ticket.blockedBy && ticket.blockedBy.length" class="blocked-badge" title="Blokkeert andere tickets">
+                → {{ ticket.blockedBy.length }}
+              </span>
             </div>
           </div>
         </div>
@@ -188,14 +240,21 @@ function getPhaseName(phaseId) {
             @click="openEditModal(ticket)"
           >
             <div class="ticket-header">
+              <span class="ticket-number">{{ ticket.ticketNumber }}</span>
               <span class="priority-badge" :class="ticket.priority">{{ ticket.priority }}</span>
               <span class="phase-tag">{{ ticket.phaseId }}</span>
             </div>
             <h4>{{ ticket.title }}</h4>
             <p v-if="ticket.description">{{ ticket.description }}</p>
-            <div v-if="ticket.estimatedHours || ticket.deadline" class="ticket-meta">
+            <div class="ticket-meta">
               <span v-if="ticket.estimatedHours">{{ ticket.estimatedHours }}u</span>
-              <span v-if="ticket.deadline">{{ ticket.deadline }}</span>
+              <span v-if="ticket.plannedWeek" class="week-badge">W{{ ticket.plannedWeek }}</span>
+              <span v-if="ticket.dependsOn && ticket.dependsOn.length" class="dep-badge" title="Heeft dependencies">
+                ← {{ ticket.dependsOn.length }}
+              </span>
+              <span v-if="ticket.blockedBy && ticket.blockedBy.length" class="blocked-badge" title="Blokkeert andere tickets">
+                → {{ ticket.blockedBy.length }}
+              </span>
             </div>
           </div>
         </div>
@@ -221,6 +280,7 @@ function getPhaseName(phaseId) {
             @click="openEditModal(ticket)"
           >
             <div class="ticket-header">
+              <span class="ticket-number">{{ ticket.ticketNumber }}</span>
               <span class="priority-badge" :class="ticket.priority">{{ ticket.priority }}</span>
               <span class="phase-tag">{{ ticket.phaseId }}</span>
             </div>
@@ -267,8 +327,13 @@ function getPhaseName(phaseId) {
             <input v-model.number="newTicket.estimatedHours" type="number" min="0" placeholder="0" />
           </div>
           <div class="form-group">
-            <label>Deadline</label>
-            <input v-model="newTicket.deadline" type="date" />
+            <label>Geplande week</label>
+            <select v-model="newTicket.plannedWeek">
+              <option :value="null">Niet gepland</option>
+              <option v-for="week in weekOptions" :key="week.value" :value="week.value">
+                {{ week.label }}
+              </option>
+            </select>
           </div>
         </div>
         <div class="modal-actions">
@@ -283,7 +348,10 @@ function getPhaseName(phaseId) {
     <!-- Edit Modal -->
     <div v-if="showEditModal && editingTicket" class="modal-overlay" @click.self="showEditModal = false">
       <div class="modal">
-        <h3>Ticket Bewerken</h3>
+        <div class="modal-header">
+          <h3>Ticket Bewerken</h3>
+          <span class="modal-ticket-number">{{ editingTicket.ticketNumber }}</span>
+        </div>
         <div class="form-group">
           <label>Titel *</label>
           <input v-model="editingTicket.title" type="text" />
@@ -325,9 +393,51 @@ function getPhaseName(phaseId) {
           </div>
         </div>
         <div class="form-group">
-          <label>Deadline</label>
-          <input v-model="editingTicket.deadline" type="date" />
+          <label>Geplande week</label>
+          <select v-model="editingTicket.plannedWeek">
+            <option :value="null">Niet gepland</option>
+            <option v-for="week in weekOptions" :key="week.value" :value="week.value">
+              {{ week.label }}
+            </option>
+          </select>
         </div>
+
+        <!-- Dependencies Section -->
+        <div class="dependencies-section">
+          <label>Afhankelijk van (moet eerst af)</label>
+          <div v-if="editingTicket.dependsOn && editingTicket.dependsOn.length" class="dependency-list">
+            <div v-for="depId in editingTicket.dependsOn" :key="depId" class="dependency-item">
+              <span class="dep-ticket-number">{{ getTicketInfo(depId)?.ticketNumber }}</span>
+              <span class="dep-ticket-title">{{ getTicketInfo(depId)?.title }}</span>
+              <button type="button" class="remove-dep" @click="removeTicketDependency(depId)">×</button>
+            </div>
+          </div>
+          <div class="add-dependency">
+            <select @change="(e) => { if(e.target.value) { addTicketDependency(parseInt(e.target.value)); e.target.value = ''; } }">
+              <option value="">+ Voeg dependency toe...</option>
+              <option
+                v-for="ticket in getAvailableTicketsForDependency(editingTicket.id)"
+                :key="ticket.id"
+                :value="ticket.id"
+                :disabled="editingTicket.dependsOn?.includes(ticket.id)"
+              >
+                {{ ticket.ticketNumber }} - {{ ticket.title }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Blocked By Section (read-only info) -->
+        <div v-if="editingTicket.blockedBy && editingTicket.blockedBy.length" class="blocked-section">
+          <label>Blokkeert (wacht op dit ticket)</label>
+          <div class="dependency-list">
+            <div v-for="blockedId in editingTicket.blockedBy" :key="blockedId" class="dependency-item readonly">
+              <span class="dep-ticket-number">{{ getTicketInfo(blockedId)?.ticketNumber }}</span>
+              <span class="dep-ticket-title">{{ getTicketInfo(blockedId)?.title }}</span>
+            </div>
+          </div>
+        </div>
+
         <div class="modal-actions">
           <button class="delete" @click="confirmDeleteTicket">Verwijderen</button>
           <div class="spacer"></div>
@@ -482,9 +592,16 @@ function getPhaseName(phaseId) {
 
 .ticket-header {
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
   align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.ticket-number {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-family: monospace;
 }
 
 .priority-badge {
@@ -505,6 +622,7 @@ function getPhaseName(phaseId) {
   background: var(--color-background);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
+  margin-left: auto;
 }
 
 .ticket-card h4 {
@@ -526,10 +644,35 @@ function getPhaseName(phaseId) {
 
 .ticket-meta {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-top: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--color-text-secondary);
+  flex-wrap: wrap;
+}
+
+.week-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.dep-badge {
+  background: #fef3c7;
+  color: #d97706;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.blocked-badge {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-weight: 500;
 }
 
 /* Modal */
@@ -557,7 +700,21 @@ function getPhaseName(phaseId) {
 }
 
 .modal h3 {
-  margin: 0 0 1.25rem;
+  margin: 0;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-ticket-number {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 0.875rem;
 }
 
 .form-group {
@@ -624,6 +781,84 @@ function getPhaseName(phaseId) {
   background: #fee2e2;
   color: #dc2626;
   border: none;
+}
+
+/* Dependencies Section */
+.dependencies-section,
+.blocked-section {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--color-background);
+  border-radius: 8px;
+}
+
+.dependencies-section label,
+.blocked-section label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.dependency-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.dependency-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.dependency-item.readonly {
+  background: var(--color-surface);
+}
+
+.dep-ticket-number {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 0.75rem;
+}
+
+.dep-ticket-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-dep {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.remove-dep:hover {
+  color: #dc2626;
+}
+
+.add-dependency select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: white;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 900px) {

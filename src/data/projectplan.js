@@ -177,5 +177,6 @@ export const initialData = {
       noGoAction: "Product-market fit nog niet bewezen, terug naar pilot of iteratie"
     }
   ],
-  tickets: []
+  tickets: [],
+  nextTicketNumber: 1
 }
