@@ -9,7 +9,10 @@ import {
   updatePhase,
   recordGoNoGoDecision,
   getCriteriaProgress,
-  addTicket
+  addTicket,
+  getPhaseSpent,
+  addPurchase,
+  deletePurchase
 } from '../stores/projectStore.js'
 
 const route = useRoute()
@@ -17,14 +20,18 @@ const router = useRouter()
 const phaseId = computed(() => parseInt(route.params.id))
 const phase = computed(() => getPhaseById(phaseId.value))
 const tickets = computed(() => getTicketsByPhase(phaseId.value))
+const phaseSpent = computed(() => getPhaseSpent(phaseId.value))
 
 const showGoNoGoModal = ref(false)
 const goNoGoDecision = ref('go')
 const goNoGoNotes = ref('')
 
-const showEditBudget = ref(false)
-const editBudgetValue = ref(0)
-const editSpentValue = ref(0)
+const showAddPurchase = ref(false)
+const newPurchase = ref({
+  description: '',
+  amount: null,
+  date: new Date().toISOString().split('T')[0]
+})
 
 const showQuickAdd = ref(false)
 const quickAddTitle = ref('')
@@ -34,18 +41,21 @@ const allCriteriaComplete = computed(() => {
   return phase.value.goNoGoCriteria.every(c => c.completed)
 })
 
-function openEditBudget() {
-  editBudgetValue.value = phase.value.budget || 0
-  editSpentValue.value = phase.value.spent || 0
-  showEditBudget.value = true
+function submitPurchase() {
+  if (!newPurchase.value.description.trim() || !newPurchase.value.amount) return
+  addPurchase(phaseId.value, newPurchase.value)
+  newPurchase.value = {
+    description: '',
+    amount: null,
+    date: new Date().toISOString().split('T')[0]
+  }
+  showAddPurchase.value = false
 }
 
-function saveBudget() {
-  updatePhase(phaseId.value, {
-    budget: editBudgetValue.value,
-    spent: editSpentValue.value
-  })
-  showEditBudget.value = false
+function removePurchase(purchaseId) {
+  if (confirm('Weet je zeker dat je deze aankoop wilt verwijderen?')) {
+    deletePurchase(phaseId.value, purchaseId)
+  }
 }
 
 function setGoNoGoStatus() {
@@ -71,8 +81,12 @@ function quickAddTicket() {
 }
 
 function formatCurrency(amount) {
-  if (!amount) return '-'
-  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount)
+  if (amount === null || amount === undefined) return '-'
+  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(amount)
+}
+
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('nl-NL')
 }
 
 function getStatusClass(status) {
@@ -102,12 +116,13 @@ function getStatusClass(status) {
       </div>
     </div>
 
-    <!-- Budget Section -->
+    <!-- Budget & Purchases Section -->
     <section class="budget-section">
       <div class="section-header">
-        <h2>Budget</h2>
-        <button class="edit-btn" @click="openEditBudget">Bewerken</button>
+        <h2>Budget en Aankopen</h2>
+        <button class="add-btn" @click="showAddPurchase = true">+ Aankoop</button>
       </div>
+
       <div class="budget-stats">
         <div class="budget-stat">
           <span class="budget-label">Budget</span>
@@ -115,13 +130,45 @@ function getStatusClass(status) {
         </div>
         <div class="budget-stat">
           <span class="budget-label">Besteed</span>
-          <span class="budget-value spent">{{ formatCurrency(phase.spent) }}</span>
+          <span class="budget-value spent">{{ formatCurrency(phaseSpent) }}</span>
         </div>
         <div class="budget-stat">
           <span class="budget-label">Resterend</span>
-          <span class="budget-value remaining">{{ formatCurrency((phase.budget || 0) - (phase.spent || 0)) }}</span>
+          <span class="budget-value remaining" :class="{ warning: phase.budget && phaseSpent > phase.budget }">
+            {{ formatCurrency((phase.budget || 0) - phaseSpent) }}
+          </span>
         </div>
       </div>
+
+      <!-- Purchase List -->
+      <div v-if="phase.purchases && phase.purchases.length > 0" class="purchase-list">
+        <h3>Aankopen</h3>
+        <div class="purchase-table">
+          <div class="purchase-row header">
+            <span class="purchase-date">Datum</span>
+            <span class="purchase-description">Omschrijving</span>
+            <span class="purchase-amount">Bedrag</span>
+            <span class="purchase-actions"></span>
+          </div>
+          <div
+            v-for="purchase in phase.purchases"
+            :key="purchase.id"
+            class="purchase-row"
+          >
+            <span class="purchase-date">{{ formatDate(purchase.date) }}</span>
+            <span class="purchase-description">{{ purchase.description }}</span>
+            <span class="purchase-amount">{{ formatCurrency(purchase.amount) }}</span>
+            <button class="delete-btn" @click="removePurchase(purchase.id)" title="Verwijderen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p v-else class="no-purchases">Nog geen aankopen geregistreerd</p>
     </section>
 
     <!-- Go/No-Go Criteria -->
@@ -237,21 +284,44 @@ function getStatusClass(status) {
       </RouterLink>
     </section>
 
-    <!-- Edit Budget Modal -->
-    <div v-if="showEditBudget" class="modal-overlay" @click.self="showEditBudget = false">
+    <!-- Add Purchase Modal -->
+    <div v-if="showAddPurchase" class="modal-overlay" @click.self="showAddPurchase = false">
       <div class="modal">
-        <h3>Budget Bewerken</h3>
+        <h3>Aankoop Toevoegen</h3>
         <div class="form-group">
-          <label>Budget</label>
-          <input type="number" v-model.number="editBudgetValue" />
+          <label>Omschrijving *</label>
+          <input
+            v-model="newPurchase.description"
+            type="text"
+            placeholder="Bijv. Hue Bridge, Motion Sensor..."
+            autofocus
+          />
         </div>
-        <div class="form-group">
-          <label>Besteed</label>
-          <input type="number" v-model.number="editSpentValue" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Bedrag *</label>
+            <input
+              v-model.number="newPurchase.amount"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+            />
+          </div>
+          <div class="form-group">
+            <label>Datum</label>
+            <input v-model="newPurchase.date" type="date" />
+          </div>
         </div>
         <div class="modal-actions">
-          <button @click="showEditBudget = false">Annuleren</button>
-          <button class="primary" @click="saveBudget">Opslaan</button>
+          <button @click="showAddPurchase = false">Annuleren</button>
+          <button
+            class="primary"
+            @click="submitPurchase"
+            :disabled="!newPurchase.description.trim() || !newPurchase.amount"
+          >
+            Toevoegen
+          </button>
         </div>
       </div>
     </div>
@@ -389,6 +459,7 @@ section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .budget-stat {
@@ -411,6 +482,80 @@ section {
 
 .budget-value.spent { color: #f59e0b; }
 .budget-value.remaining { color: #10b981; }
+.budget-value.remaining.warning { color: #ef4444; }
+
+/* Purchases */
+.purchase-list h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.purchase-table {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.purchase-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 100px 40px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.purchase-row:last-child {
+  border-bottom: none;
+}
+
+.purchase-row.header {
+  background: var(--color-background);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.purchase-date {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.purchase-description {
+  font-size: 0.875rem;
+}
+
+.purchase-amount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.no-purchases {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: 1rem;
+}
 
 /* Criteria */
 .progress-badge {
@@ -759,6 +904,12 @@ section {
   font-size: 0.875rem;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .modal-actions {
   display: flex;
   gap: 0.5rem;
@@ -782,8 +933,25 @@ section {
   border: none;
 }
 
+.modal-actions button.primary:disabled {
+  background: var(--color-border);
+  cursor: not-allowed;
+}
+
 .not-found {
   text-align: center;
   padding: 3rem;
+}
+
+@media (max-width: 600px) {
+  .purchase-row {
+    grid-template-columns: 80px 1fr 80px 32px;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

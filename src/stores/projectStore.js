@@ -123,7 +123,41 @@ export function getCriteriaProgress(phase) {
 }
 
 export function getTotalSpent() {
-  return store.phases.reduce((sum, p) => sum + (p.spent || 0), 0)
+  return store.phases.reduce((sum, p) => {
+    const phaseSpent = (p.purchases || []).reduce((pSum, purchase) => pSum + (purchase.amount || 0), 0)
+    return sum + phaseSpent
+  }, 0)
+}
+
+export function getPhaseSpent(phaseId) {
+  const phase = store.phases.find(p => p.id === phaseId)
+  if (!phase || !phase.purchases) return 0
+  return phase.purchases.reduce((sum, p) => sum + (p.amount || 0), 0)
+}
+
+export function addPurchase(phaseId, purchase) {
+  const phase = store.phases.find(p => p.id === phaseId)
+  if (phase) {
+    if (!phase.purchases) {
+      phase.purchases = []
+    }
+    phase.purchases.push({
+      id: Date.now(),
+      description: purchase.description,
+      amount: purchase.amount,
+      date: purchase.date || new Date().toISOString().split('T')[0]
+    })
+  }
+}
+
+export function deletePurchase(phaseId, purchaseId) {
+  const phase = store.phases.find(p => p.id === phaseId)
+  if (phase && phase.purchases) {
+    const index = phase.purchases.findIndex(p => p.id === purchaseId)
+    if (index !== -1) {
+      phase.purchases.splice(index, 1)
+    }
+  }
 }
 
 export function getTotalBudget() {
