@@ -90,12 +90,12 @@ export const initialData = {
     { id: 103, ticketNumber: "TM-03", title: "Domeinnaam gerustthuis.care registreren", phaseId: 1, epic: "Foundation", status: "done", priority: "should", dependsOn: [], blockedBy: [] },
     { id: 104, ticketNumber: "TM-04", title: "Privacyverklaring opstellen en publiceren", phaseId: 1, epic: "Foundation", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 105, ticketNumber: "TM-05", title: "Cookieverklaring opstellen", phaseId: 1, epic: "Foundation", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 106, ticketNumber: "TM-06", title: "Verwerkersovereenkomst Supabase (DPA) ondertekenen", phaseId: 1, epic: "Foundation", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 106, ticketNumber: "TM-06", title: "Verwerkersovereenkomst Supabase (DPA) ondertekenen", phaseId: 1, epic: "Foundation", status: "in-progress", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 107, ticketNumber: "TM-07", title: "Email opzetten: info@gerustthuis.care + email service kiezen en koppelen", phaseId: 1, epic: "Foundation", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 109, ticketNumber: "TM-08", title: "Brandbook v3 definitief maken (Deep Sage & Amber)", phaseId: 1, epic: "Foundation", status: "done", priority: "should", dependsOn: [], blockedBy: [] },
 
     // Epic: Website
-    { id: 110, ticketNumber: "TM-10", title: "Branding doorvoeren op website (sage palet, DM Serif + DM Sans, logo)", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 110, ticketNumber: "TM-10", title: "Branding doorvoeren op website + portaal (sage palet, DM Serif + DM Sans, logo)", phaseId: 1, epic: "Website", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 111, ticketNumber: "TM-11", title: "Landingspagina herschrijven met StoryBrand structuur", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 112, ticketNumber: "TM-12", title: "Wachtlijst-formulier bouwen en testen", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 113, ticketNumber: "TM-13", title: "Double opt-in flow bouwen (AVG-verplicht)", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
