@@ -109,7 +109,7 @@ export const initialData = {
     // Epic: SEO & Tracking
     { id: 120, ticketNumber: "TM-20", title: "Cookiebot installeren en configureren", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 121, ticketNumber: "TM-21", title: "Meta Pixel installeren (na cookie consent)", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 122, ticketNumber: "TM-22", title: "Google Analytics 4 of Plausible installeren", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
+    { id: 122, ticketNumber: "TM-22", title: "Google Analytics 4 of Plausible installeren", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "should", dependsOn: [], blockedBy: [] },
     { id: 123, ticketNumber: "TM-23", title: "Conversie-event: wachtlijst aanmelding", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 124, ticketNumber: "TM-24", title: "Meta title en description op alle pagina's", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 125, ticketNumber: "TM-25", title: "Open Graph tags instellen (social sharing)", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
