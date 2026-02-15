@@ -96,7 +96,7 @@ export const initialData = {
 
     // Epic: Website
     { id: 110, ticketNumber: "TM-10", title: "Branding doorvoeren op website + portaal (sage palet, DM Serif + DM Sans, logo)", phaseId: 1, epic: "Website", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 111, ticketNumber: "TM-11", title: "Landingspagina herschrijven met StoryBrand structuur", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 111, ticketNumber: "TM-11", title: "Landingspagina herschrijven met StoryBrand structuur", phaseId: 1, epic: "Website", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 112, ticketNumber: "TM-12", title: "Wachtlijst-formulier bouwen en testen (Supabase + Edge Function)", phaseId: 1, epic: "Website", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 113, ticketNumber: "TM-13", title: "Double opt-in flow bouwen (AVG-verplicht)", phaseId: 1, epic: "Website", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 114, ticketNumber: "TM-14", title: "Bevestigingspagina na aanmelding", phaseId: 1, epic: "Website", status: "done", priority: "should", dependsOn: [], blockedBy: [] },
@@ -111,12 +111,12 @@ export const initialData = {
     { id: 121, ticketNumber: "TM-21", title: "Meta Pixel installeren (na cookie consent)", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 122, ticketNumber: "TM-22", title: "Google Analytics 4 of Plausible installeren", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
     { id: 123, ticketNumber: "TM-23", title: "Conversie-event: wachtlijst aanmelding", phaseId: 1, epic: "SEO & Tracking", status: "in-progress", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 124, ticketNumber: "TM-24", title: "Meta title en description op alle pagina's", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 125, ticketNumber: "TM-25", title: "Open Graph tags instellen (social sharing)", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 126, ticketNumber: "TM-26", title: "Favicon en app-icoon instellen", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
-    { id: 127, ticketNumber: "TM-27", title: "Sitemap.xml + Google Search Console", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
-    { id: 128, ticketNumber: "TM-28", title: "Schema.org structured data", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "nice", dependsOn: [], blockedBy: [] },
-    { id: 129, ticketNumber: "TM-29", title: "WhatsApp preview testen", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
+    { id: 124, ticketNumber: "TM-24", title: "Meta title en description op alle pagina's", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 125, ticketNumber: "TM-25", title: "Open Graph tags instellen (social sharing)", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 126, ticketNumber: "TM-26", title: "Favicon en app-icoon instellen", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "should", dependsOn: [], blockedBy: [] },
+    { id: 127, ticketNumber: "TM-27", title: "Sitemap.xml + Google Search Console", phaseId: 1, epic: "SEO & Tracking", status: "in-progress", priority: "should", dependsOn: [], blockedBy: [] },
+    { id: 128, ticketNumber: "TM-28", title: "Schema.org structured data", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "nice", dependsOn: [], blockedBy: [] },
+    { id: 129, ticketNumber: "TM-29", title: "WhatsApp preview testen", phaseId: 1, epic: "SEO & Tracking", status: "in-progress", priority: "should", dependsOn: [], blockedBy: [] },
 
     // Epic: Social Media
     { id: 130, ticketNumber: "TM-30", title: "Instagram Business account aanmaken", phaseId: 1, epic: "Social Media", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
