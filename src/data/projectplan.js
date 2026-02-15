@@ -102,15 +102,15 @@ export const initialData = {
     { id: 114, ticketNumber: "TM-14", title: "Bevestigingspagina na aanmelding", phaseId: 1, epic: "Website", status: "done", priority: "should", dependsOn: [], blockedBy: [] },
     { id: 115, ticketNumber: "TM-15", title: "Responsive mobiel + tablet", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 116, ticketNumber: "TM-16", title: "Testen op echte devices", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 117, ticketNumber: "TM-17", title: "KVK-nummer en handelsnaam in footer", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 117, ticketNumber: "TM-17", title: "KVK-nummer en handelsnaam in footer", phaseId: 1, epic: "Website", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 118, ticketNumber: "TM-18", title: "Laadtijd onder 3 seconden", phaseId: 1, epic: "Website", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
     { id: 119, ticketNumber: "TM-19", title: "Welkomstmail automatisering instellen (Zoho SMTP via Edge Function)", phaseId: 1, epic: "Website", status: "in-progress", priority: "should", dependsOn: [], blockedBy: [] },
 
     // Epic: SEO & Tracking
-    { id: 120, ticketNumber: "TM-20", title: "Cookiebot installeren en configureren", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 120, ticketNumber: "TM-20", title: "Cookiebot installeren en configureren", phaseId: 1, epic: "SEO & Tracking", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 121, ticketNumber: "TM-21", title: "Meta Pixel installeren (na cookie consent)", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 122, ticketNumber: "TM-22", title: "Google Analytics 4 of Plausible installeren", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
-    { id: 123, ticketNumber: "TM-23", title: "Conversie-event: wachtlijst aanmelding", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 123, ticketNumber: "TM-23", title: "Conversie-event: wachtlijst aanmelding", phaseId: 1, epic: "SEO & Tracking", status: "in-progress", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 124, ticketNumber: "TM-24", title: "Meta title en description op alle pagina's", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 125, ticketNumber: "TM-25", title: "Open Graph tags instellen (social sharing)", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 126, ticketNumber: "TM-26", title: "Favicon en app-icoon instellen", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },

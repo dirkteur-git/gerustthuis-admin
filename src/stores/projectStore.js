@@ -1,7 +1,7 @@
 import { reactive, watch } from 'vue'
 import { initialData } from '../data/projectplan.js'
 
-const STORAGE_KEY = 'gerustthuis-admin-v9'
+const STORAGE_KEY = 'gerustthuis-admin-v10'
 
 // Load from localStorage or use initial data
 function loadData() {
