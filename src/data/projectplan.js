@@ -213,7 +213,28 @@ export const initialData = {
     // Epic: Auth & Accounts (Fase 1 — Foundation)
     { id: 160, ticketNumber: "TM-60", title: "Wachtwoord vergeten flow in portaal login", phaseId: 1, epic: "Foundation", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
     { id: 161, ticketNumber: "TM-61", title: "2-staps email verificatie bij account aanmaken", phaseId: 1, epic: "Foundation", status: "done", priority: "must", dependsOn: [], blockedBy: [] },
-    { id: 162, ticketNumber: "TM-62", title: "Zoho secrets configureren in Supabase Edge Functions", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [], description: "Supabase Dashboard → Settings → Edge Functions → Secrets. Voeg toe: ZOHO_MAIL_ACCESS_TOKEN, ZOHO_MAIL_ACCOUNT_ID, ZOHO_CAMPAIGNS_CLIENT_ID, ZOHO_CAMPAIGNS_CLIENT_SECRET, ZOHO_CAMPAIGNS_REFRESH_TOKEN, ZOHO_CAMPAIGNS_LIST_KEY, SITE_URL (https://gerustthuis.nl). Zonder deze secrets werkt de waitlist INSERT + rate limiting al, maar worden bevestigingsmail en Zoho Campaigns sync overgeslagen." }
+    { id: 162, ticketNumber: "TM-62", title: "Zoho secrets configureren in Supabase Edge Functions", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [], description: "Supabase Dashboard → Settings → Edge Functions → Secrets. Voeg toe: ZOHO_MAIL_ACCESS_TOKEN, ZOHO_MAIL_ACCOUNT_ID, ZOHO_CAMPAIGNS_CLIENT_ID, ZOHO_CAMPAIGNS_CLIENT_SECRET, ZOHO_CAMPAIGNS_REFRESH_TOKEN, ZOHO_CAMPAIGNS_LIST_KEY, SITE_URL (https://gerustthuis.nl). Zonder deze secrets werkt de waitlist INSERT + rate limiting al, maar worden bevestigingsmail en Zoho Campaigns sync overgeslagen." },
+
+    // === Nieuwe tickets uit voice memo (16 feb 2026) ===
+
+    // Epic: Foundation
+    { id: 163, ticketNumber: "TM-63", title: "Domeinnaam gerustthuis.nl registreren (naast gerustthuis.care)", phaseId: 1, epic: "Foundation", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
+
+    // Epic: Website — wachtlijst & conversie
+    { id: 164, ticketNumber: "TM-64", title: "Postcode-veld toevoegen aan wachtlijstformulier (geen huisnummer, AVG documentatie aanpassen)", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 165, ticketNumber: "TM-65", title: "Early bird korting prominenter op landingspagina", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 166, ticketNumber: "TM-66", title: "Website navigatie versimpelen (focus op wachtlijst, minder items in nav)", phaseId: 1, epic: "Website", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 167, ticketNumber: "TM-67", title: "Installatie-opties tonen op website (zelf-installatiekit vs. installatie door ons)", phaseId: 1, epic: "Website", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
+    { id: 168, ticketNumber: "TM-68", title: "Follow-up questionnaire na wachtlijst aanmelding (Hue bezit, installatievoorkeur)", phaseId: 1, epic: "Website", status: "todo", priority: "should", dependsOn: [112], blockedBy: [] },
+
+    // Epic: SEO & Tracking — vindbaarheid
+    { id: 169, ticketNumber: "TM-69", title: "AI-leesbaarheid website verbeteren (prerendering/SSR voor SPA)", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "should", dependsOn: [], blockedBy: [] },
+    { id: 170, ticketNumber: "TM-70", title: "SEO zoekwoorden (mantelzorg, ouderenzorg, thuismonitoring) in content verwerken", phaseId: 1, epic: "SEO & Tracking", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+
+    // Epic: Portaal — pre-launch versimpeling
+    { id: 171, ticketNumber: "TM-71", title: "Portaal versimpelen: overbodige pagina's verwijderen, clean interface", phaseId: 1, epic: "Portaal", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 172, ticketNumber: "TM-72", title: "Portaal: communiceren dat monitoring nog niet actief is (pre-launch status)", phaseId: 1, epic: "Portaal", status: "todo", priority: "must", dependsOn: [], blockedBy: [] },
+    { id: 173, ticketNumber: "TM-73", title: "Data training propositie: Hue gebruikers trainen model → extra korting", phaseId: 1, epic: "Portaal", status: "todo", priority: "should", dependsOn: [], blockedBy: [] }
   ],
-  nextTicketNumber: 63
+  nextTicketNumber: 74
 }

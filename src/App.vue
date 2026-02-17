@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
-import { exportData } from './stores/projectStore.js'
+import { store, initStore, exportData } from './stores/projectStore.js'
 import { supabase, signOut } from './services/supabase'
 
 const route = useRoute()
@@ -15,12 +15,20 @@ const isRoadmapSection = computed(() =>
   route.path.startsWith('/fasen/')
 )
 
+async function loadProjectData(session) {
+  if (session?.user) {
+    await initStore()
+  }
+}
+
 onMounted(async () => {
   const { data: { session } } = await supabase.auth.getSession()
   user.value = session?.user || null
+  await loadProjectData(session)
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.auth.onAuthStateChange(async (_event, session) => {
     user.value = session?.user || null
+    await loadProjectData(session)
   })
 })
 
@@ -72,7 +80,15 @@ async function handleLogout() {
     </div>
 
     <main class="main" :class="{ 'main-home': isHome }">
-      <RouterView />
+      <div v-if="store.loading && isRoadmapSection" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Project laden...</p>
+      </div>
+      <div v-else-if="store.error && isRoadmapSection" class="error-state">
+        <p>Fout bij laden: {{ store.error }}</p>
+        <button @click="loadProjectData({ user: user })" class="retry-btn">Opnieuw proberen</button>
+      </div>
+      <RouterView v-else />
     </main>
   </div>
 </template>
@@ -199,6 +215,44 @@ async function handleLogout() {
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.retry-btn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.retry-btn:hover {
+  opacity: 0.9;
 }
 
 @media (max-width: 768px) {
