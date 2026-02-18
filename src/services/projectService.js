@@ -1,4 +1,4 @@
-import { supabase } from './supabase.js'
+import { supabase, planningDb } from './supabase.js'
 
 // ============================================================
 // Project
@@ -43,7 +43,7 @@ export async function updateProject(projectUuid, updates) {
 // ============================================================
 
 export async function fetchPhases(projectId) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('project_phases')
     .select(`
       *,
@@ -58,7 +58,7 @@ export async function fetchPhases(projectId) {
 }
 
 export async function createPhases(phasesArray) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('project_phases')
     .insert(phasesArray)
     .select()
@@ -68,7 +68,7 @@ export async function createPhases(phasesArray) {
 }
 
 export async function updatePhase(phaseUuid, updates) {
-  const { error } = await supabase
+  const { error } = await planningDb()
     .from('project_phases')
     .update(updates)
     .eq('id', phaseUuid)
@@ -81,7 +81,7 @@ export async function updatePhase(phaseUuid, updates) {
 // ============================================================
 
 export async function createCriteria(criteriaArray) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('phase_criteria')
     .insert(criteriaArray)
     .select()
@@ -91,7 +91,7 @@ export async function createCriteria(criteriaArray) {
 }
 
 export async function updateCriterion(criterionUuid, updates) {
-  const { error } = await supabase
+  const { error } = await planningDb()
     .from('phase_criteria')
     .update(updates)
     .eq('id', criterionUuid)
@@ -104,7 +104,7 @@ export async function updateCriterion(criterionUuid, updates) {
 // ============================================================
 
 export async function createPurchase(purchaseData) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('phase_purchases')
     .insert(purchaseData)
     .select()
@@ -115,7 +115,7 @@ export async function createPurchase(purchaseData) {
 }
 
 export async function deletePurchase(purchaseUuid) {
-  const { error } = await supabase
+  const { error } = await planningDb()
     .from('phase_purchases')
     .delete()
     .eq('id', purchaseUuid)
@@ -128,7 +128,7 @@ export async function deletePurchase(purchaseUuid) {
 // ============================================================
 
 export async function fetchTickets(projectId) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('project_tickets')
     .select('*')
     .eq('project_id', projectId)
@@ -139,7 +139,7 @@ export async function fetchTickets(projectId) {
 }
 
 export async function createTickets(ticketsArray) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('project_tickets')
     .insert(ticketsArray)
     .select()
@@ -149,7 +149,7 @@ export async function createTickets(ticketsArray) {
 }
 
 export async function createTicket(ticketData) {
-  const { data, error } = await supabase
+  const { data, error } = await planningDb()
     .from('project_tickets')
     .insert(ticketData)
     .select()
@@ -160,7 +160,7 @@ export async function createTicket(ticketData) {
 }
 
 export async function updateTicket(ticketUuid, updates) {
-  const { error } = await supabase
+  const { error } = await planningDb()
     .from('project_tickets')
     .update(updates)
     .eq('id', ticketUuid)
@@ -169,7 +169,7 @@ export async function updateTicket(ticketUuid, updates) {
 }
 
 export async function deleteTicket(ticketUuid) {
-  const { error } = await supabase
+  const { error } = await planningDb()
     .from('project_tickets')
     .delete()
     .eq('id', ticketUuid)

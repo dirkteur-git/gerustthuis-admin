@@ -5,6 +5,10 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Schema-scoped helpers voor tabellen buiten public
+export const activityDb = () => supabase.schema('activity')
+export const planningDb = () => supabase.schema('planning')
+
 // Alleen deze e-mailadressen hebben toegang tot het admin portaal
 const ALLOWED_EMAILS = ['dirk.bakker@gmx.net']
 
@@ -101,7 +105,7 @@ export async function getRoomActivityHourly(configId, days = 7) {
   since.setDate(since.getDate() - (days - 1))
   since.setHours(0, 0, 0, 0)
 
-  const { data, error } = await supabase
+  const { data, error } = await activityDb()
     .from('room_activity_hourly')
     .select('room_name, hour, total_events')
     .eq('config_id', configId)
