@@ -42,16 +42,33 @@ export async function signOut() {
 // ============================================================
 
 export async function getHouseholds() {
-  const { data, error } = await supabase
+  // Haal households op (public schema)
+  const { data: households, error } = await supabase
     .from('households')
-    .select(`
-      id, name, config_id, created_at, updated_at,
-      hue_config ( id, user_email )
-    `)
+    .select('id, name, config_id, created_at, updated_at')
     .order('name')
 
   if (error) throw error
-  return data || []
+
+  // Haal hue_config apart op (integrations schema — migratie 028)
+  const configIds = (households || []).map(h => h.config_id).filter(Boolean)
+  let configMap = {}
+
+  if (configIds.length > 0) {
+    const { data: configs } = await supabase.schema('integrations')
+      .from('hue_config')
+      .select('id, user_email')
+      .in('id', configIds)
+
+    configMap = Object.fromEntries(
+      (configs || []).map(c => [c.id, c])
+    )
+  }
+
+  return (households || []).map(h => ({
+    ...h,
+    hue_config: configMap[h.config_id] || null
+  }))
 }
 
 export async function getHouseholdMembers(householdId) {
@@ -94,6 +111,61 @@ export async function getHouseholdInvitations(householdId) {
 
   if (error) throw error
   return data || []
+}
+
+// ============================================================
+// Waitlist
+// ============================================================
+
+export async function getWaitlistSignups() {
+  // Probeer eerst met postcode (migratie 027), fallback zonder
+  let { data, error } = await supabase
+    .from('waitlist')
+    .select('id, email, name, referral_source, postcode, confirmed, synced_to_zoho, created_at')
+    .order('created_at', { ascending: false })
+
+  if (error?.message?.includes('postcode')) {
+    const result = await supabase
+      .from('waitlist')
+      .select('id, email, name, referral_source, confirmed, synced_to_zoho, created_at')
+      .order('created_at', { ascending: false })
+    data = result.data
+    error = result.error
+  }
+
+  if (error) throw error
+  return data || []
+}
+
+// ============================================================
+// Analytics (GA4 via Edge Function)
+// ============================================================
+
+export async function getAnalyticsData(dateRange = '30', metrics = []) {
+  let res
+  try {
+    res = await fetch(`${supabaseUrl}/functions/v1/ga4-analytics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'apikey': supabaseAnonKey,
+      },
+      body: JSON.stringify({ dateRange, metrics }),
+    })
+  } catch {
+    // Edge function niet gedeployed of niet bereikbaar
+    return { success: false, error: 'NOT_CONFIGURED' }
+  }
+
+  // Edge function bestaat niet (404) of niet geconfigureerd
+  if (res.status === 404) {
+    return { success: false, error: 'NOT_CONFIGURED' }
+  }
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Analytics ophalen mislukt')
+  return data
 }
 
 // ============================================================
