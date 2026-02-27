@@ -52,6 +52,11 @@ const routes = [
     path: '/huishoudens',
     name: 'Huishoudens',
     component: () => import('../views/Huishoudens.vue')
+  },
+  {
+    path: '/analyse',
+    name: 'Analyse',
+    component: () => import('../views/Analyse.vue')
   }
 ]
 
@@ -60,26 +65,31 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const requiresAuth = to.meta.requiresAuth !== false
 
   if (requiresAuth) {
-    const { data: { session } } = await supabase.auth.getSession()
-
-    if (!session || !isAllowedEmail(session.user?.email)) {
-      if (session) await supabase.auth.signOut()
-      return next('/login')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session || !isAllowedEmail(session.user?.email)) {
+        if (session) await supabase.auth.signOut().catch(() => {})
+        return '/login'
+      }
+    } catch {
+      return '/login'
     }
   }
 
   if (to.path === '/login') {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session && isAllowedEmail(session.user?.email)) {
-      return next('/')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session && isAllowedEmail(session.user?.email)) {
+        return '/'
+      }
+    } catch {
+      // Negeer — toon gewoon de loginpagina
     }
   }
-
-  next()
 })
 
 export default router

@@ -29,6 +29,13 @@ const tiles = [
     to: '/huishoudens',
     icon: 'households',
     color: '#f59e0b'
+  },
+  {
+    title: 'Anomaly Analyse',
+    description: 'Z-score anomaly detection per huishouden',
+    to: '/analyse',
+    icon: 'analyse',
+    color: '#8b5cf6'
   }
 ]
 </script>
@@ -72,6 +79,10 @@ const tiles = [
           <svg v-if="tile.icon === 'households'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <!-- Analyse -->
+          <svg v-if="tile.icon === 'analyse'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
           </svg>
         </div>
         <div class="tile-content">
